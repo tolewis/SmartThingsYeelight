@@ -5,34 +5,34 @@ metadata {
 		capability "Color Control"
 		capability "Color Temperature"
 		capability "Switch"
-        capability "Relay Switch"
+        	capability "Relay Switch"
 		capability "Refresh"
 		capability "Actuator"
 		capability "Sensor"
-        capability "Health Check"  //Needed for CONNECT APP compatibility
-        capability "polling"  //Not sure if this is needed
+        	capability "Health Check"  //Needed for CONNECT APP compatibility
+        	capability "polling"  //Not sure if this is needed
 
 		command "reset"
-        command "refresh"
+        	command "refresh"
         
-        attribute "colorName", "string"  //Needed for Colour Shortcuts
+        	attribute "colorName", "string"  //Needed for Colour Shortcuts
         
-        command "coolWhite"
-        command "warmWhite"
+        	command "coolWhite"
+        	command "warmWhite"
 		command "daylight"
 		command "red"
-        command "green"
-        command "blue"
-        command "cyan"
-        command "magenta"
-        command "orange"
-        command "purple"
-        command "yellow"
-        command "pink"
-        command "police"
-        command "alarm"
-        command "colourcycle"
-        command "halt"
+        	command "green"
+        	command "blue"
+        	command "cyan"
+        	command "magenta"
+        	command "orange"
+        	command "purple"
+        	command "yellow"
+        	command "pink"
+        	command "police"
+        	command "alarm"
+        	command "colourcycle"
+        	command "halt"
         
 	}
 
@@ -67,11 +67,12 @@ metadata {
 	valueTile("hue", "device.hue", inactiveLabel: false, decoration: "flat") {
 		state "hue", label: 'Hue ${currentValue}   '
 	}
+	
 	standardTile("coolWhite", "device.colorName", height: 1, width: 1, decoration: "flat", inactiveLabel: false, canChangeIcon: false) {
 		state "off", label:"cool white", action:"coolWhite", icon:"st.illuminance.illuminance.dark", backgroundColor:"#D8D8D8", defaultState: true
 		//state "coolWhite", label:"cool white", action:"off", icon:"st.illuminance.illuminance.bright", backgroundColor:"#FF33CB"
 	}
-    standardTile("warmWhite", "device.colorName", height: 1, width: 1, decoration: "flat", inactiveLabel: false, canChangeIcon: false) {
+   	standardTile("warmWhite", "device.colorName", height: 1, width: 1, decoration: "flat", inactiveLabel: false, canChangeIcon: false) {
 		state "off", label:"warm white", action:"warmWhite", icon:"st.illuminance.illuminance.dark", backgroundColor:"#D8D8D8", defaultState: true
 		//state "warmWhite", label:"warm white", action:"off", icon:"st.illuminance.illuminance.bright", backgroundColor:"#FF33CB"
 	}
@@ -144,22 +145,12 @@ metadata {
 
 def installed()  {
 	log.debug "installed"
-    initialize()
+    	initialize()
 }
 
 def updated()  {
 	log.debug "updated"
-    initialize()
-}
-
-
-private initialize() {
-    log.trace "Executing 'initialize'"
-    sendEvent(name: "DeviceWatch-Enroll", value: [protocol: "cloud", scheme:"untracked"].encodeAsJson(), displayed: false)
-}
-
-private getVersion() {
-    "PUBLISHED"
+    	initialize()
 }
 
 //Parse incoming from Yeelight -----NOT WORKING-----
@@ -170,29 +161,29 @@ def parse(String description) {
 //Reset Yeelight to White, 6000K
 def reset() {
 	log.debug "reset"
-    //getProp()
-    delayBetween([
+    	//getProp()
+    	delayBetween([
 		on(),
-        setColor("red":255, "hex":"#FFFFFF", "blue":255, "saturation":100.0, "hue":0.0, "green":255, "alpha":1.0),
-        setColorTemperature(6000)
-    ], 300)
+        	setColor("red":255, "hex":"#FFFFFF", "blue":255, "saturation":100.0, "hue":0.0, "green":255, "alpha":1.0),
+        	setColorTemperature(6000)
+    	], 300)
 }
 
 //Send Command to Yeelight
 def transmit(yeelightCommand) {
-    def String ipaddr = DeviceLocalLan
-    def port = 55443
-    def String hexIp = ipaddr.tokenize('.').collect {
+    	def String ipaddr = DeviceLocalLan
+    	def port = 55443
+    	def String hexIp = ipaddr.tokenize('.').collect {
         String.format('%02X', it.toInteger())
-    }.join()
-    def String hexPort = String.format('%04X', port)
-    def String myNetworkID = "${hexIp}:${hexPort}"
-    //log.debug "network ID: " + myNetworkID
-    device.deviceNetworkId = myNetworkID
+    	}.join()
+    	def String hexPort = String.format('%04X', port)
+    	def String myNetworkID = "${hexIp}:${hexPort}"
+    	//log.debug "network ID: " + myNetworkID
+    	device.deviceNetworkId = myNetworkID
 	def transmittedData = new physicalgraph.device.HubAction(yeelightCommand, physicalgraph.device.Protocol.LAN, myNetworkID)
-    transmittedData.options = [type:'LAN_TYPE_CLIENT', protocol:'LAN_PROTOCOL_TCP']
+    	transmittedData.options = [type:'LAN_TYPE_CLIENT', protocol:'LAN_PROTOCOL_TCP']
 	log.debug "Sent " + transmittedData
-    sendHubCommand(transmittedData)
+    	sendHubCommand(transmittedData)
 }
 
 //Get Properties of Yeelight
@@ -204,56 +195,56 @@ def getProp() {
 //Turn Yeelight ON
 def on() {
 	//getProp()
-    delayBetween([
-        transmit("""{"id": 1, "method": "set_power", "params":["on", "smooth", 500]}\r\n"""),
+    	delayBetween([
+        	transmit("""{"id": 1, "method": "set_power", "params":["on", "smooth", 500]}\r\n"""),
 		transmit("""{"id": 1, "method": "set_bright", "params":[${defaultONLevel}, "smooth", 100]}\r\n""")
-    ], 300)
-    sendEvent(name: "switch", value: "on")
-    sendEvent(name: "level", value: defaultONLevel)
+    	], 300)
+    	sendEvent(name: "switch", value: "on")
+    	sendEvent(name: "level", value: defaultONLevel)
 }
 
 //Turn Yeelight OFF
 def off() {
 	//getProp()
 	transmit("""{"id": 1, "method": "set_power", "params":["off", "smooth", 500]}\r\n""")
-    sendEvent(name: "switch", value: "off")
+    	sendEvent(name: "switch", value: "off")
 }
 
 //Check if Yeelight is off and turn on if it is - called from setLevel, setColor and setColorTemp
 def powerCheck() {
 	def powerState = device.currentValue("switch")
-    if (powerState == "off") {
-    	transmit("""{"id": 1, "method": "set_power", "params":["on", "sudden"]}\r\n""")
-        sendEvent(name: "switch", value: "on")
+    	if (powerState == "off") {
+    		transmit("""{"id": 1, "method": "set_power", "params":["on", "sudden"]}\r\n""")
+        	sendEvent(name: "switch", value: "on")
     }
 }
 
 //Set Yeelight Dim Level
 def setLevel(level) {
 	//getProp()
-    powerCheck()
+    	powerCheck()
 	if(level < 2) {
 		off()
-        sendEvent(name: "level", value: 0)
+        	sendEvent(name: "level", value: 0)
     }
-    else {
+    	else {
    		transmit("""{"id": 1, "method": "set_bright", "params":[$level, "smooth", 100]}\r\n""")
-        sendEvent(name: "level", value: level)
+        	sendEvent(name: "level", value: level)
     }
 }
 
 //Set Yeelight Colour
 def setColor(value) {
 	//getProp()
-    powerCheck()
+    	powerCheck()
 	def result = []
-    //transmit("""{"id": 1, "method": "set_power", "params":["on", "smooth", 500]}\r\n""")
-    def red = value.red
-    def green = value.green
-    def blue = value.blue
+    	//transmit("""{"id": 1, "method": "set_power", "params":["on", "smooth", 500]}\r\n""")
+    	def red = value.red
+    	def green = value.green
+    	def blue = value.blue
 	log.debug "setColor: ${value}"
-    def rgb = (red*65536)+(green*256)+blue
-    transmit("""{"id": 1, "method": "set_rgb", "params":[${rgb}, "smooth", 500]}\r\n""")
+    	def rgb = (red*65536)+(green*256)+blue
+    	transmit("""{"id": 1, "method": "set_rgb", "params":[${rgb}, "smooth", 500]}\r\n""")
 	if(value.hue) sendEvent(name: "hue", value: value.hue)
 	if(value.hex) sendEvent(name: "color", value: value.hex)
 	if(value.switch) sendEvent(name: "switch", value: value.switch)
@@ -263,25 +254,25 @@ def setColor(value) {
 //Set Yeelight Colour Temperature
 def setColorTemperature(kelvin) {
 	//getProp()
-    powerCheck()
+    	powerCheck()
 	if(kelvin > 6500) kelvin = 6500
-    log.debug "setColorTemperature: ${kelvin}K"
+    	log.debug "setColorTemperature: ${kelvin}K"
 	transmit("""{"id": 1, "method": "set_ct_abx", "params":[${kelvin}, "smooth", 500]}\r\n""")
-    sendEvent(name: "colorTemperature", value: kelvin)
+    	sendEvent(name: "colorTemperature", value: kelvin)
 }
 
 // Colour Shortcuts
 def coolWhite() {
-    setColor("red":255, "hex":"#FFFFFF", "blue":255, "saturation":100.0, "hue":0.0, "green":255, "alpha":1.0)
-    setColorTemperature(coolWhiteValue)
+    	setColor("red":255, "hex":"#FFFFFF", "blue":255, "saturation":100.0, "hue":0.0, "green":255, "alpha":1.0)
+    	setColorTemperature(coolWhiteValue)
 }
 def warmWhite() {
 	setColor("red":255, "hex":"#FFFFFF", "blue":255, "saturation":100.0, "hue":0.0, "green":255, "alpha":1.0)
-    setColorTemperature(warmWhiteValue)
+    	setColorTemperature(warmWhiteValue)
 }
 def daylight() {
 	setColor("red":255, "hex":"#FFFFFF", "blue":255, "saturation":100.0, "hue":0.0, "green":255, "alpha":1.0)
-    setColorTemperature(dayWhiteValue)
+    	setColorTemperature(dayWhiteValue)
 }
 def red() {
 	setColor("red":255, "hex":"#FF0000", "blue":0, "saturation":100.0, "hue":0.0, "green":0, "alpha":1.0)
